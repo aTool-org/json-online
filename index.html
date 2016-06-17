@@ -1,0 +1,169 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <title>Json在线解析及格式化验证 - Json.hust.cc</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="HandheldFriendly" content="True" />
+    <meta name="MobileOptimized" content="320" />
+    <meta http-equiv="Cache-Control" content="max-age=7200" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="all" />
+    <meta name="author" content="json..hust.cc" />
+    <meta name="keywords" content="json,json在线解析,json格式化,json格式验证,json转xml,xml转json"/>
+    <meta name="description" content="Json中文网致力于在中国推广Json,并提供相关的Json解析、验证、格式化、压缩、编辑器以及Json与XML相互转换等服务"/>
+    <link href="http://cdn.bootcss.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="http://cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+    <link href="res/base.css" rel="stylesheet">
+    <style></style>
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="http://cdn.bootcss.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="http://cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <!-- Favicons -->
+</head>
+<body style="over-flow:hidden;">
+<header class="header">
+    <div class="row-fluid" >
+        <div class="col-md-5" style="position:relative;">
+            <a class="logo" href="/">Json.<span style="color:#555;">Hust.cc</span></a>
+        </div>
+        <nav class="col-md-7" style="padding:10px 0;"  align="right">
+            <div  class="navi">
+                <a href="http://www.atool.org/" target="_blank" data-placement="bottom">更多在线工具</a>
+            </div>
+        </nav>
+        <br style="clear:both;" />
+    </div>
+</header>
+
+
+<main class="row-fluid">
+    <div class="col-md-5" style="padding:0;">
+        <textarea id="json-src" placeholder="在此输入json字符串或XML字符串..."   class="form-control adapter_height"  style="height:550px;padding:20px;border:0;border-right:solid 1px #ddd;border-bottom:solid 1px #ddd;border-radius:0;resize: none; outline:none;">    {"tools": [
+    { "name":"css format" , "site":"http://www.atool.org/csscompression.php" },
+    { "name":"json format" , "site":"http://www.atool.org/jsonformat.php" },
+    { "name":"hash MD5" , "site":"http://www.atool.org/hash.php" }
+    ]
+    }</textarea>
+    </div>
+    <div class="col-md-7" style="padding:0;">
+        <div style="padding:10px;font-size:16px;border-bottom:solid 1px #ddd;" class="navi">
+            <a href="#" class="tip zip" title="压缩"  data-placement="bottom"><i class="fa fa-database"></i></a>
+            <a href="#" class="tip xml" title="转XML"  data-placement="bottom"><i class="fa fa-file-excel-o"></i></a>
+            <a href="#" class="tip " style="color:#15b374;cursor:no-drop;" title="染色"  data-placement="bottom"><i class="fa fa-flask"></i></a>
+            <a href="#" class="tip clear" title="清空"  data-placement="bottom"><i class="fa fa-trash"></i></a>
+            <a href="#" class="tip save" title="保存"  data-placement="bottom"><i class="fa fa-floppy-o"></i></a>
+        </div>
+        <div id="json-target" class="adapter_height" style="height:510px;padding:20px;border-right:solid 1px #ddd;border-bottom:solid 1px #ddd;border-radius:0;resize: none;overflow-y:scroll; outline:none;">
+        </div>
+        <form id="form-save" method="POST"><input type="hidden" value="" id="txt-content" name="content"></form>
+    </div>
+    <br style="clear:both;" />
+</main>
+<script src="http://cdn.bootcss.com/jquery/1.11.1/jquery.min.js"></script>
+<script src="res/jquery.message.js"></script>
+<script src="res/jquery.json.js"></script>
+<script src="res/jquery.xml2json.js"></script>
+<script src="res/jquery.json2xml.js"></script>
+<script src="http://cdn.bootcss.com/json2/20150503/json2.min.js"></script>
+<script src="http://cdn.bootcss.com/jsonlint/1.6.0/jsonlint.min.js"></script>
+<script src="http://cdn.bootcss.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+<script type="text/javascript">
+var current_json = '';
+var current_json_str = '';
+var xml_flag = false;
+var zip_flag = false;
+$('.tip').tooltip();
+function init(){
+    xml_flag = false;
+    zip_flag = false;
+    $('.xml').attr('style','color:#999;');
+    $('.zip').attr('style','color:#999;');
+}
+$('#json-src').keyup(function(){
+    init();
+    var content = $.trim($(this).val());
+    var result = '';
+    if (content!='') {
+        //如果是xml,那么转换为json
+        if (content.substr(0,1) === '<' && content.substr(-1,1) === '>') {
+            try{
+                var json_obj = $.xml2json(content);
+                content = JSON.stringify(json_obj);
+            }catch(e){
+                result = '解析错误：<span style="color: #f1592a;font-weight:bold;">' + e.message + '</span>';
+                current_json_str = result;
+                $('#json-target').html(result);
+                return false;
+            }
+
+        }
+        try{
+            current_json = jsonlint.parse(content);
+            current_json_str = JSON.stringify(current_json);
+            //current_json = JSON.parse(content);
+            result = new JSONFormat(content,4).toString();
+        }catch(e){
+            result = '<span style="color: #f1592a;font-weight:bold;">' + e + '</span>';
+            current_json_str = result;
+        }
+
+        $('#json-target').html(result);
+    }else{
+        $('#json-target').html('');
+    }
+
+});
+$('.xml').click(function(){
+    if (xml_flag) {
+        $('#json-src').keyup();
+    }else{
+        var result = $.json2xml(current_json);
+        $('#json-target').html('<textarea style="width:100%;height:100%;border:0;resize:none;">'+result+'</textarea>');
+        xml_flag = true;
+        $(this).attr('style','color:#15b374;');
+    }
+
+});
+$('.zip').click(function(){
+    if (zip_flag) {
+        $('#json-src').keyup();
+    }else{
+        $('#json-target').html(current_json_str);
+        zip_flag = true;
+        $(this).attr('style','color:#15b374;');
+    }
+
+});
+$('.clear').click(function(){
+     $('#json-src').val('');
+     $('#json-target').html('');
+});
+$('.save').click(function(){
+    var content = JSON.stringify(current_json);
+    $('#txt-content').val(content);
+    $("#form-save").submit();
+});
+$('#json-src').keyup();
+
+function getWinHeight() {
+    var winHeight = 0;
+    if (window.innerHeight)
+        winHeight = window.innerHeight;
+    else if ((document.body) && (document.body.clientHeight))
+        winHeight = document.body.clientHeight;
+    return winHeight;
+}
+$(window).resize(function() {
+    $('#json-src').css('height', getWinHeight() - 117);
+    $('#json-target').css('height', getWinHeight() - 160);
+});
+$(window).resize();
+</script>
+<footer style="padding:20px;text-align:center;color:#999;">©2014 <a target="_blank" href="http://www.atool.org/">Hust.cc</a> All right reserved. Code from Json.cn
+</footer>
+</body>
+</html>
